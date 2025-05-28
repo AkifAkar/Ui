@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rover Cameras</title>
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f9f9f9;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    padding: 10px;
+    box-sizing: border-box;
+    gap: 10px;
+    overflow: auto; /* <-- Allows scrolling if needed */
+    flex-wrap: wrap; /* <-- Allow controls to drop below */
+}
+
+img {
+    flex: 1 1 auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    min-width: 120px;
+    max-width: 25vw;
+    flex-shrink: 0;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    overflow: visible;
+}
+
+button {
+    padding: 10px 14px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+    white-space: nowrap;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+select {
+    padding: 6px;
+    width: 100%;
+}
+
+/* Responsive layout for very narrow screens */
+@media (max-width: 800px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .controls {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    button, select {
+        flex: 1 1 auto;
+        min-width: 100px;
+        max-width: 150px;
+    }
+
+    img {
+        width: 100%;
+        height: auto;
+    }
+}
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="controls">
+            <button onclick="captureFrame('video1')">Photo</button>
+            <select onchange="changeFps('fps1')" id="select1">
+                <option>1080p</option>
+                <option>720p</option>
+                <option>480p</option>
+            </select>
+            <select onchange="changeFps('fps1')" id="fps1">
+                <option>30</option>
+                <option>20</option>
+                <option>15</option>
+                <option>10</option>
+            </select>
+        </div>
+        <img  src="{{ video_url }}/stream.mjpg" alt="Image 1" id="video1" crossorigin="anonymous">
+    </div>
+
+    <script>
+        function captureFrame(videoId) {
+            const img = document.getElementById(videoId);
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            console.log(canvas)
+            const dataURL = canvas.toDataURL('image/jpeg');
+
+            fetch('/save-frame', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image_data: dataURL })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`${videoId} - Fotoğraf başarıyla kaydedildi!`);
+                } else {
+                    alert(`${videoId} - Hata: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error(`${videoId} - Error:`, error);
+            });
+        }
+
+        function changeFps(selectid) {
+            const selec = document.getElementById(selectid);
+            value = selec.value
+            if (selectid.includes("1")){resol = document.getElementById("select1").value} 
+            else if (selectid.includes("2")){resol = document.getElementById("select2").value}
+            else if (selectid.includes("3")){resol = document.getElementById("select3").value}
+            else{resol = document.getElementById("select4").value}
+            
+            if (selectid.includes("1")){url = "{{ video_url }}";console.log(url)} 
+            else if (selectid.includes("2")){url = "{{ video2_url }}";console.log(url)}
+            else if (selectid.includes("3")){url = "{{ video3_url }}";console.log(url)}
+            else{url = "{{ video4_url }}";console.log(url)}
+
+            fetch(url+'/change_fps', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ fpsValue: value, resolution: resol })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`${videoId} - Fotoğraf başarıyla kaydedildi!`);
+                } else {
+                    alert(`${videoId} - Hata: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error(`${videoId} - Error:`, error);
+            });
+        }
+    </script>
+
+</body>
+</html>
