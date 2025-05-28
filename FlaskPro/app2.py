@@ -15,11 +15,35 @@ if not os.path.exists(SAVE_FOLDER):
     os.makedirs(SAVE_FOLDER)
 
 @app.route('/front')
-def home():
+def front():
     # URL of the video to be linked to
     video_url = "http://10.42.0.137:8000"
     return render_template('OneCamNew.html', video_url=video_url)
 
+
+@app.route('/back')
+def back():
+    # URL of the video to be linked to
+    video_url = "http://10.42.0.137:8000"
+    return render_template('OneCamNew.html', video_url=video_url)
+
+
+@app.route('/right')
+def right():
+    # URL of the video to be linked to
+    video_url = "http://10.42.0.137:8000"
+    return render_template('OneCamNew.html', video_url=video_url)
+
+@app.route('/left')
+def left():
+    # URL of the video to be linked to
+    video_url = "http://10.42.0.137:8000"
+    return render_template('OneCamNew.html', video_url=video_url)
+
+
+@app.route('/map')
+def map():
+    return render_template('responsive.html')
 
 @app.route('/save-frame', methods=['POST'])
 def save_frame():
